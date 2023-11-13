@@ -3,7 +3,7 @@ import './App.css';
 
 function App() {
   return (
-    <Canvas width={500} height={500} />
+    <Canvas width={window.innerWidth} height={window.innerHeight} />
   );
 }
 

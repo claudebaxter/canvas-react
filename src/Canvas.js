@@ -7,20 +7,20 @@ export function Canvas(props) {
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d');
 
-        //drawing on the canvas
+        //initial drawing on the canvas
         context.fillStyle = 'red';
         context.fillRect(0, 0, props.width, props.height);
 
-        //cleaning up the canvas
+        //clickHandler logic to update canvas
         const clickHandler = () => {
             context.fillStyle = 'blue';
             context.fillRect(0, 0, props.width, props.height);
         }
 
-        //updating the canvas
+        //event listener to call clickHandler function
         canvas.addEventListener('click', clickHandler);
 
-        //Adding props to the canvas component
+        //UseEffect Cleanup: Remove click event listener on unmount
         return () => {
             canvas.removeEventListener('click', clickHandler);
         }
