@@ -3,7 +3,9 @@ import React, { useRef, useEffect, useState } from 'react';
 export function Canvas(props) {
     const canvasRef = useRef(null);
     const [player, setPlayer] = useState(null);
+    const [projectiles, setProjectiles] = useState([]);
 
+    //This hook is responsible for initializing the canvas and setting up intial event listeners
     useEffect(() => {
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d');
@@ -18,11 +20,11 @@ export function Canvas(props) {
         const newPlayer = new Player(centerX, centerY, 30, 'blue');
         setPlayer(newPlayer);
 
-        //clickHandler logic to update canvas
+        //clickHandler logic to update canvas with projectiles
         const clickHandler = () => {
-           /* example of logic to turn background blue on click event 
-           context.fillStyle = 'blue';
-            context.fillRect(0, 0, props.width, props.height);*/
+            const newProjectile = new Projectile(newPlayer.x, newPlayer.y, 5, 'red', { x: 1, y: 1 });
+            setProjectiles([...projectiles, newProjectile]);
+            console.log("projectiles", projectiles)
         }
 
         //event listener to call clickHandler function
@@ -34,6 +36,7 @@ export function Canvas(props) {
         }
     }, [props.width, props.height]);
 
+    //hook triggers when player state changes, draws player on the canvas
     useEffect(() => {
         //draw player when player state variable is not null
         if (player) {
@@ -45,7 +48,20 @@ export function Canvas(props) {
             context.fillStyle = player.color;
             context.fill();
         }
-    }, [player]);
+
+        //draw projectiles (need to set up trigger event)
+        if (projectiles.length > 0) {
+            const canvas = canvasRef.current;
+            const context = canvas.getContext('2d');
+
+            for (const projectile of projectiles) {
+                context.beginPath();
+                context.arc(projectile.x, projectile.y, projectile.radius, 0, Math.PI * 2, false);
+                context.fillStyle = projectile.color;
+                context.fill();
+            }
+        }
+    }, [player, projectiles]);
 
     return <canvas ref={canvasRef} width={props.width} height={props.height} />;
 }
@@ -57,4 +73,14 @@ class Player {
         this.radius = radius;
         this.color = color;
     }
-}
+};
+
+class Projectile {
+    constructor(x, y, radius, color, velocity) {
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.color = color;
+        this.velocity = velocity;
+    }
+};
