@@ -21,10 +21,11 @@ export function Canvas(props) {
         setPlayer(newPlayer);
 
         //clickHandler logic to update canvas with projectiles
-        const clickHandler = () => {
+        const clickHandler = (event) => {
             const newProjectile = new Projectile(newPlayer.x, newPlayer.y, 5, 'red', { x: 1, y: 1 });
             setProjectiles([...projectiles, newProjectile]);
-            console.log("projectiles", projectiles)
+            //console.log("projectiles", projectiles)
+            console.log('Click coordinates: ', event.clientX, event.clientY);
         }
 
         //event listener to call clickHandler function
