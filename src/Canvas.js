@@ -33,6 +33,7 @@ class Projectile {
         this.context.fill();
     }
     update() {
+        this.draw();
         this.x = this.x + this.velocity.x;
         this.y = this.y + this.velocity.y;
     }
@@ -51,7 +52,7 @@ const clickHandler = (event, canvas, projectiles) => {
         canvas.getContext('2d')
     );
     projectiles.push(newProjectile);
-    console.log('click', event);
+    console.log('click', projectiles);
 };
 
 const Canvas = () => {
@@ -75,7 +76,6 @@ const Canvas = () => {
             player.draw();
 
             projectiles.forEach((projectile) => {
-                projectile.draw();
                 projectile.update();
             });
 
