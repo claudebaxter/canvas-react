@@ -1,101 +1,91 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 
-export function Canvas(props) {
-    const canvasRef = useRef(null);
-    const [player, setPlayer] = useState(null);
-    const [projectiles, setProjectiles] = useState([]);
-
-    //This hook is responsible for initializing the canvas and setting up intial event listeners
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        const context = canvas.getContext('2d');
-
-        //initial drawing on the canvas
-        context.fillStyle = 'black';
-        context.fillRect(0, 0, props.width, props.height);
-
-        //instantiate the player in canvas center on component mount
-        const centerX = props.width / 2;
-        const centerY = props.height / 2;
-        const newPlayer = new Player(centerX, centerY, 30, 'blue');
-        setPlayer(newPlayer);
-
-        
-        function animate() {
-            requestAnimationFrame(animate);
-            console.log('go');
-        }
-
-        animate();
-
-        //clickHandler logic to update canvas with projectiles
-        const clickHandler = (event) => {
-            const newProjectile = new Projectile(
-                event.clientX, 
-                event.clientY, 
-                5, 
-                'red', 
-                null
-            );
-            setProjectiles([...projectiles, newProjectile]);
-            //console.log("projectiles", projectiles)
-            console.log('Click coordinates: ', event.clientX, event.clientY);
-        }
-
-        //event listener to call clickHandler function
-        canvas.addEventListener('click', clickHandler);
-
-        //UseEffect Cleanup: Remove click event listener on unmount
-        return () => {
-            canvas.removeEventListener('click', clickHandler);
-        }
-    }, [props.width, props.height]);
-
-    //hook triggers when player state changes, draws player on the canvas
-    useEffect(() => {
-        //draw player when player state variable is not null
-        if (player) {
-            const canvas = canvasRef.current;
-            const context = canvas.getContext('2d');
-
-            context.beginPath();
-            context.arc(player.x, player.y, player.radius, 0, Math.PI * 2, false);
-            context.fillStyle = player.color;
-            context.fill();
-        }
-
-        //draw projectiles (need to set up trigger event)
-        if (projectiles.length > 0) {
-            const canvas = canvasRef.current;
-            const context = canvas.getContext('2d');
-
-            for (const projectile of projectiles) {
-                context.beginPath();
-                context.arc(projectile.x, projectile.y, projectile.radius, 0, Math.PI * 2, false);
-                context.fillStyle = projectile.color;
-                context.fill();
-            }
-        }
-    }, [player, projectiles]);
-
-    return <canvas ref={canvasRef} width={props.width} height={props.height} />;
-}
-
+// Define prototypes and handlers outside the component function
 class Player {
-    constructor(x, y, radius, color) {
+    constructor(x, y, radius, color, context) {
         this.x = x;
         this.y = y;
         this.radius = radius;
         this.color = color;
+        this.context = context;
     }
-};
+    draw() {
+        this.context.beginPath();
+        this.context.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        this.context.fillStyle = this.color;
+        this.context.fill();
+    }
+}
 
 class Projectile {
-    constructor(x, y, radius, color, velocity) {
+    constructor(x, y, radius, color, velocity, context) {
         this.x = x;
         this.y = y;
         this.radius = radius;
         this.color = color;
         this.velocity = velocity;
+        this.context = context;
     }
+    draw() {
+        this.context.beginPath();
+        this.context.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        this.context.fillStyle = this.color;
+        this.context.fill();
+    }
+}
+
+const clickHandler = (event, canvas, projectiles) => {
+    const newProjectile = new Projectile(
+        canvas.width / 2,
+        canvas.height / 2,
+        5,
+        'red',
+        null,
+        canvas.getContext('2d')
+    );
+    projectiles.push(newProjectile);
+    console.log('click', event);
 };
+
+const Canvas = () => {
+    const canvasRef = useRef(null);
+    const animationFrame = useRef(null);
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        const context = canvas.getContext('2d');
+        const projectiles = [];
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const player = new Player(canvas.width / 2, canvas.height / 2, 30, 'blue', context);
+
+        function animate() {
+            animationFrame.current = requestAnimationFrame(animate);
+
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            player.draw();
+
+            projectiles.forEach((projectile) => {
+                projectile.draw();
+            });
+
+            console.log('intervalId');
+        }
+
+        animate();
+
+        const clickHandlerWrapper = (event) => clickHandler(event, canvas, projectiles);
+        canvas.addEventListener('click', clickHandlerWrapper);
+
+        return () => {
+            canvas.removeEventListener('click', clickHandlerWrapper);
+            cancelAnimationFrame(animationFrame.current);
+        };
+    }, []);
+
+    return <canvas ref={canvasRef} />;
+};
+
+export default Canvas;

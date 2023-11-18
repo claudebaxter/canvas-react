@@ -1,11 +1,11 @@
-import { Canvas } from './Canvas.js';
+import Canvas from './Canvas.js';
 import './App.css';
 import React from 'react';
 
 function App() {
   return (
     <React.Fragment>
-      <Canvas width={window.innerWidth} height={window.innerHeight} />
+      <Canvas />
     </React.Fragment>
   );
 }
