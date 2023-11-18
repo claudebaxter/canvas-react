@@ -32,6 +32,10 @@ class Projectile {
         this.context.fillStyle = this.color;
         this.context.fill();
     }
+    update() {
+        this.x = this.x + this.velocity.x;
+        this.y = this.y + this.velocity.y;
+    }
 }
 
 const clickHandler = (event, canvas, projectiles) => {
@@ -40,7 +44,10 @@ const clickHandler = (event, canvas, projectiles) => {
         canvas.height / 2,
         5,
         'red',
-        null,
+        {
+            x: 1,
+            y: 1
+        },
         canvas.getContext('2d')
     );
     projectiles.push(newProjectile);
@@ -69,6 +76,7 @@ const Canvas = () => {
 
             projectiles.forEach((projectile) => {
                 projectile.draw();
+                projectile.update();
             });
 
             console.log('intervalId');
