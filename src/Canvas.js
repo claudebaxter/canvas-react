@@ -37,7 +37,29 @@ class Projectile {
         this.x = this.x + this.velocity.x;
         this.y = this.y + this.velocity.y; 
     }
-}
+};
+
+class Enemy {
+    constructor(x, y, radius, color, velocity, context) {
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.color = color;
+        this.velocity = velocity;
+        this.context = context;
+    }
+    draw() {
+        this.context.beginPath();
+        this.context.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        this.context.fillStyle = this.color;
+        this.context.fill();
+    }
+    update() {
+        this.draw();
+        this.x = this.x + this.velocity.x;
+        this.y = this.y + this.velocity.y; 
+    }
+};
 
 const clickHandler = (event, canvas, projectiles) => {
     const angle = Math.atan2(
@@ -69,11 +91,26 @@ const Canvas = () => {
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d');
         const projectiles = [];
+        const enemies = [];
 
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
         const player = new Player(canvas.width / 2, canvas.height / 2, 30, 'blue', context);
+
+        function spawnEnemies() {
+            setInterval(() => {
+                const x = 100;
+                const y = 100;
+                const radius = 30;
+                const color = 'green'
+                const velocity = {
+                    x: 1, y: 1
+                }
+                enemies.push(new Enemy(x, y, radius, color, velocity, canvas.getContext('2d')));
+                console.log(enemies);
+            }, 1000)
+        };
 
         function animate() {
             animationFrame.current = requestAnimationFrame(animate);
@@ -85,10 +122,15 @@ const Canvas = () => {
                 projectile.update();
             });
 
-            console.log('intervalId');
+            enemies.forEach(enemy => {
+                enemy.update();
+            });
+
+            console.log('animationFrame');
         }
 
         animate();
+        spawnEnemies();
 
         const clickHandlerWrapper = (event) => clickHandler(event, canvas, projectiles);
         canvas.addEventListener('click', clickHandlerWrapper);
