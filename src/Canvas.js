@@ -35,23 +35,29 @@ class Projectile {
     update() {
         this.draw();
         this.x = this.x + this.velocity.x;
-        this.y = this.y + this.velocity.y;
+        this.y = this.y + this.velocity.y; 
     }
 }
 
 const clickHandler = (event, canvas, projectiles) => {
-    const newProjectile = new Projectile(
-        canvas.width / 2,
-        canvas.height / 2,
-        5,
-        'red',
-        {
-            x: 1,
-            y: 1
-        },
+    const angle = Math.atan2(
+        event.clientY - canvas.height / 2,
+        event.clientX - canvas.width / 2)
+
+    const velocity = {
+        x: Math.cos(angle),
+        y: Math.sin(angle)
+    }
+
+    projectiles.push(new Projectile(
+        canvas.width / 2, 
+        canvas.height / 2, 
+        5, 
+        'red', 
+        velocity,
         canvas.getContext('2d')
-    );
-    projectiles.push(newProjectile);
+    ));
+    
     console.log('click', projectiles);
 };
 
