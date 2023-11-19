@@ -99,7 +99,7 @@ const Canvas = () => {
         const player = new Player(canvas.width / 2, canvas.height / 2, 30, 'blue', context);
 
         function spawnEnemies() {
-            setInterval(() => {
+            //setInterval(() => {
                 const radius = Math.random() * (30 - 4) + 4;
 
                 let x;
@@ -124,7 +124,7 @@ const Canvas = () => {
                 };
                 enemies.push(new Enemy(x, y, radius, color, velocity, canvas.getContext('2d')));
                 console.log(enemies);
-            }, 1000);
+            //}, 1000);
         };
 
         function animate() {
@@ -139,6 +139,14 @@ const Canvas = () => {
 
             enemies.forEach(enemy => {
                 enemy.update();
+
+                projectiles.forEach(projectile => {
+                    const dist = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y);
+                    
+                    if (dist - enemy.radius - projectile.radius < 1) {
+                        console.log('hit detected');
+                    }
+                });
             });
 
             console.log('animationFrame');
