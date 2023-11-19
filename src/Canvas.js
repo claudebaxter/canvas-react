@@ -104,8 +104,13 @@ const Canvas = () => {
                 const y = 100;
                 const radius = 30;
                 const color = 'green'
+                const angle = Math.atan2(
+                    canvas.height / 2 - y,
+                    canvas.width / 2 - x
+                );
                 const velocity = {
-                    x: 1, y: 1
+                    x: Math.cos(angle), 
+                    y: Math.sin(angle)
                 }
                 enemies.push(new Enemy(x, y, radius, color, velocity, canvas.getContext('2d')));
                 console.log(enemies);
