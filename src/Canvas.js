@@ -130,7 +130,8 @@ const Canvas = () => {
         function animate() {
             animationFrame.current = requestAnimationFrame(animate);
 
-            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.fillStyle = 'rgb(0, 0, 0, 0.1)';
+            context.fillRect(0, 0, canvas.width, canvas.height);
             player.draw();
 
             projectiles.forEach((projectile, index) => {
