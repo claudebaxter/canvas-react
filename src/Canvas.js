@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import { gsap } from 'gsap';
 
 // Define prototypes and handlers outside the component function
 class Player {
@@ -83,6 +84,8 @@ const clickHandler = (event, canvas, projectiles) => {
     console.log('click', projectiles);
 };
 
+console.log('gsap', gsap);
+
 const Canvas = () => {
     const canvasRef = useRef(null);
     const animationFrame = useRef(null);
@@ -152,6 +155,7 @@ const Canvas = () => {
                 enemy.update();
 
                 const dist = Math.hypot(player.x - enemy.x, player.y - enemy.y);
+                //enemy player hit detection
                 if (dist - enemy.radius - player.radius < 1) {
                     cancelAnimationFrame(animationFrame.current);
                 }
@@ -159,11 +163,21 @@ const Canvas = () => {
                 projectiles.forEach((projectile, projectileIndex) => {
                     const dist = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y);
                     
+                    //projectile enemy hit detection
                     if (dist - enemy.radius - projectile.radius < 1) {
-                        setTimeout(() => {
-                            enemies.splice(index, 1);
-                            projectiles.splice(projectileIndex, 1);
-                        }, 0);
+                        if (enemy.radius - 10> 10) {
+                            gsap.to(enemy, {
+                                radius: enemy.radius - 10
+                            });
+                            setTimeout(() => {
+                                projectiles.splice(projectileIndex, 1);
+                            }, 0);
+                        } else {
+                            setTimeout(() => {
+                                enemies.splice(index, 1);
+                                projectiles.splice(projectileIndex, 1);
+                            }, 0);
+                        }
                     }
                 });
             });
