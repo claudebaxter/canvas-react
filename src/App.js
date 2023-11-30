@@ -1,11 +1,24 @@
+import React, { useState } from 'react';
 import Canvas from './Canvas.js';
 import './App.css';
-import React from 'react';
 
 function App() {
+    const [score, setScore] = useState(0);
+
+    const updateScore = (amount) => {
+        setScore((prevScore) => prevScore + amount);
+    };
   return (
     <React.Fragment>
-      <Canvas />
+        <div style={{
+            position: 'absolute',
+            color: 'red',
+            padding: '8px',
+            fontSize: '14px',
+            userSelect: 'none'}}>
+                <span>Score: <span id="scoreEl">{score}</span></span>
+        </div>
+        <Canvas updateScore={updateScore}/>
     </React.Fragment>
   );
 }
@@ -14,15 +27,7 @@ export default App;
 
 /*
 this will go above Canvas component eventually
-<div style={{
-                position: 'absolute',
-                color: 'red',
-                padding: '8px',
-                fontSize: '14px',
-                userSelect: 'none'
-            }}>
-                <span>Score: <span id="scoreEl">0</span></span>
-            </div>
+
 
             <div id="modal" style={{
                 display: 'none',

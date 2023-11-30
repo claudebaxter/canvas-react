@@ -114,7 +114,7 @@ const clickHandler = (event, canvas, projectiles) => {
     console.log('click', projectiles);
 };
 
-const Canvas = () => {
+const Canvas = ({ updateScore }) => {
     const canvasRef = useRef(null);
     const animationFrame = useRef(null);
 
@@ -155,7 +155,7 @@ const Canvas = () => {
                     y: Math.sin(angle)
                 };
                 enemies.push(new Enemy(x, y, radius, color, velocity, canvas.getContext('2d')));
-                console.log(enemies);
+                //console.log(enemies);
             }, 1000);
         };
 
@@ -216,6 +216,7 @@ const Canvas = () => {
                                     canvas.getContext('2d')))
                         }
                         if (enemy.radius - 10 > 5) {
+                            updateScore(100);
                             gsap.to(enemy, {
                                 radius: enemy.radius - 10
                             });
@@ -223,6 +224,8 @@ const Canvas = () => {
                                 projectiles.splice(projectileIndex, 1);
                             }, 0);
                         } else {
+                            //update score & remove enemies when shot
+                            updateScore(150);
                             setTimeout(() => {
                                 enemies.splice(index, 1);
                                 projectiles.splice(projectileIndex, 1);
@@ -232,7 +235,7 @@ const Canvas = () => {
                 });
             });
 
-            console.log('animationFrame');
+            //console.log('animationFrame');
         }
 
         animate();
