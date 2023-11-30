@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { gsap } from 'gsap';
+import './App.css';
 
 // Define prototypes and handlers outside the component function
 class Player {
@@ -303,7 +304,7 @@ const Canvas = ({ updateScore, score, setScore }) => {
                     <div className="switch-container">
                         <label className="switch">
                             <input type="checkbox" defaultChecked />
-                            <span className="slider-round"></span>
+                            <span className="slider round"></span>
                             <span className="switch-label">Music On/Off</span>
                         </label>
                     </div>
