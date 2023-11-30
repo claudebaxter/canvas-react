@@ -117,6 +117,7 @@ const clickHandler = (event, canvas, projectiles) => {
 
 const Canvas = ({ updateScore, score, setScore }) => {
     const [restartModal, setRestartModal] = useState(false);
+    const [startModal, setStartModal] = useState(true);
     const [newGame, setNewGame] = useState(0);
     const canvasRef = useRef(null);
     const animationFrame = useRef(null);
@@ -131,7 +132,14 @@ const Canvas = ({ updateScore, score, setScore }) => {
         setNewGame(newGame + 1);
     };
 
+    const handleStart = () => {
+        setStartModal(false);
+        setNewGame(newGame + 1);
+    };
+
     useEffect(() => {
+        if (newGame === 0) return;
+
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d');
         const projectiles = [];
@@ -308,6 +316,34 @@ const Canvas = ({ updateScore, score, setScore }) => {
                             <span className="switch-label">Music On/Off</span>
                         </label>
                     </div>
+            </div>
+        )}
+        {startModal && (
+            <div id="startModal" style={{
+                position: 'absolute',
+                backgroundColor: 'white',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                left: '50%',
+                padding: '16px',
+                maxWidth: '500px',
+                width: '100%',
+                textAlign: 'center',
+                borderRadius: '15px'
+            }}>
+                <h1 style={{ fontSize: '24px', color: 'red', marginBottom: '0', marginTop: '8px' }}>ASAteroids</h1>
+                <button id="startButton" style={{
+                    marginTop: '12px',
+                    backgroundColor: 'blue',
+                    border: 'none',
+                    borderRadius: '15px',
+                    color: 'white',
+                    padding: '8px 16px',
+                    cursor: 'pointer'
+                }}
+                onClick={handleStart}>
+                    START
+                </button>
             </div>
         )}
         <canvas ref={canvasRef} />
