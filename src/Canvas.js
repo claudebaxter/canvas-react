@@ -188,7 +188,8 @@ const Canvas = ({ updateScore }) => {
                 }
             });
 
-            enemies.forEach((enemy, index) => {
+            for (let index = enemies.length - 1; index >= 0; index--) {
+                const enemy = enemies[index];
                 enemy.update();
 
                 const dist = Math.hypot(player.x - enemy.x, player.y - enemy.y);
@@ -197,7 +198,8 @@ const Canvas = ({ updateScore }) => {
                     cancelAnimationFrame(animationFrame.current);
                 }
 
-                projectiles.forEach((projectile, projectileIndex) => {
+                for (let projectilesIndex = projectiles.length - 1; projectilesIndex >= 0; projectilesIndex--) {
+                    const projectile = projectiles[projectilesIndex];
                     const dist = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y);
                     
                     //projectile enemy hit detection
@@ -221,19 +223,19 @@ const Canvas = ({ updateScore }) => {
                                 radius: enemy.radius - 10
                             });
                             setTimeout(() => {
-                                projectiles.splice(projectileIndex, 1);
+                                projectiles.splice(projectilesIndex, 1);
                             }, 0);
                         } else {
                             //update score & remove enemies when shot
                             updateScore(150);
                             setTimeout(() => {
                                 enemies.splice(index, 1);
-                                projectiles.splice(projectileIndex, 1);
+                                projectiles.splice(projectilesIndex, 1);
                             }, 0);
                         }
                     }
-                });
-            });
+                };
+            };
 
             //console.log('animationFrame');
         }
