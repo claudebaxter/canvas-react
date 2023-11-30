@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 
 // Define prototypes and handlers outside the component function
@@ -114,9 +114,21 @@ const clickHandler = (event, canvas, projectiles) => {
     console.log('click', projectiles);
 };
 
-const Canvas = ({ updateScore }) => {
+const Canvas = ({ updateScore, score, setScore }) => {
+    const [restartModal, setRestartModal] = useState(false);
+    const [newGame, setNewGame] = useState(0);
     const canvasRef = useRef(null);
     const animationFrame = useRef(null);
+
+    const handlePlayerDeath = () => {
+        setRestartModal(true);
+    };
+
+    const handleRestart = () => {
+        setScore(0);
+        setRestartModal(false);
+        setNewGame(newGame + 1);
+    };
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -196,6 +208,7 @@ const Canvas = ({ updateScore }) => {
                 //enemy player hit detection
                 if (dist - enemy.radius - player.radius < 1) {
                     cancelAnimationFrame(animationFrame.current);
+                    handlePlayerDeath();
                 }
 
                 for (let projectilesIndex = projectiles.length - 1; projectilesIndex >= 0; projectilesIndex--) {
@@ -246,9 +259,59 @@ const Canvas = ({ updateScore }) => {
             canvas.removeEventListener('click', clickHandlerWrapper);
             cancelAnimationFrame(animationFrame.current);
         };
-    }, []);
+    }, [newGame]);
 
-    return <canvas ref={canvasRef} />;
+    
+
+    return (
+        <React.Fragment>
+        {restartModal && (
+            <div id="modal" style={{
+                    display: 'block',
+                    position: 'absolute',
+                    backgroundColor: 'white',
+                    top: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    left: '50%',
+                    padding: '16px',
+                    maxWidth: '500px',
+                    width: '100%',
+                    textAlign: 'center',
+                    borderRadius: '15px'
+                }}>
+                    <label style={{ fontSize: '14px', 
+                        color: 'grey' }}>Game Over</label>
+                    <h1 id="modalScore" style={{ 
+                        fontSize: '48px', 
+                        color: 'red', 
+                        marginBottom: '0', 
+                        marginTop: '8px' }}>{score}</h1>
+                    <p style={{ 
+                        color: 'grey', 
+                        margin: '0', 
+                        fontSize: '13px' }}>POINTS</p>
+                    <button id="button" style={{
+                        marginTop: '12px',
+                        backgroundColor: 'blue',
+                        border: 'none',
+                        borderRadius: '15px',
+                        color: 'white',
+                        padding: '8px 16px',
+                        cursor: 'pointer'
+                    }} 
+                    onClick={handleRestart}>RESTART</button>
+                    <div className="switch-container">
+                        <label className="switch">
+                            <input type="checkbox" defaultChecked />
+                            <span className="slider-round"></span>
+                            <span className="switch-label">Music On/Off</span>
+                        </label>
+                    </div>
+            </div>
+        )}
+        <canvas ref={canvasRef} />
+        </React.Fragment>
+    )
 };
 
 export default Canvas;
