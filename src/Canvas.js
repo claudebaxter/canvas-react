@@ -166,15 +166,17 @@ const Canvas = ({ updateScore }) => {
             context.fillRect(0, 0, canvas.width, canvas.height);
             player.draw();
 
-            particles.forEach((particle, index) => {
+            for (let index = particles.length - 1; index >= 0; index--) {
+                const particle = particles[index];
                 if (particle.alpha <= 0) {
                     particles.splice(index, 1);
                 } else {
                     particle.update();
                 }
-            });
+            };
 
-            projectiles.forEach((projectile, index) => {
+            for (let index = projectiles.length - 1; index >= 0; index--) {
+                const projectile = projectiles[index];
                 projectile.update();
 
                 //remove projectiles from array at edge of map
@@ -182,11 +184,9 @@ const Canvas = ({ updateScore }) => {
                     projectile.x - projectile.radius > canvas.width ||
                     projectile.y + projectile.radius < 0 ||
                     projectile.y - projectile.radius > canvas.height) {
-                    setTimeout(() => {
-                        projectiles.splice(index, 1)
-                    }, 0)
+                    projectiles.splice(index, 1)
                 }
-            });
+            };
 
             for (let index = enemies.length - 1; index >= 0; index--) {
                 const enemy = enemies[index];
@@ -222,16 +222,12 @@ const Canvas = ({ updateScore }) => {
                             gsap.to(enemy, {
                                 radius: enemy.radius - 10
                             });
-                            setTimeout(() => {
-                                projectiles.splice(projectilesIndex, 1);
-                            }, 0);
+                            projectiles.splice(projectilesIndex, 1);
                         } else {
                             //update score & remove enemies when shot
                             updateScore(150);
-                            setTimeout(() => {
-                                enemies.splice(index, 1);
-                                projectiles.splice(projectilesIndex, 1);
-                            }, 0);
+                            enemies.splice(index, 1);
+                            projectiles.splice(projectilesIndex, 1);
                         }
                     }
                 };
