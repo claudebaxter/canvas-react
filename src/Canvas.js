@@ -1,7 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import './App.css';
-import playerImage from './icon.svg';
 
 // Define prototypes and handlers outside the component function
 class Player {
@@ -75,19 +74,23 @@ class Particle {
 };
 
 class Enemy {
-    constructor(x, y, radius, color, velocity, context) {
+    constructor(x, y, radius, color, velocity, enemyImage, context) {
         this.x = x;
         this.y = y;
         this.radius = radius;
         this.color = color;
         this.velocity = velocity;
+        this.enemyImage = enemyImage;
         this.context = context;
     }
     draw() {
-        this.context.beginPath();
-        this.context.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-        this.context.fillStyle = this.color;
-        this.context.fill();
+        this.context.drawImage(
+            this.enemyImage,
+            this.x - this.radius,
+            this.y - this.radius,
+            this.radius * 2,
+            this.radius * 2
+        )
     }
     update() {
         this.draw();
@@ -143,6 +146,25 @@ const Canvas = ({ updateScore, score, setScore }) => {
     useEffect(() => {
         if (newGame === 0) return;
 
+        const iconDir = "./enemies/";
+        const iconFiles = [
+            "icon-ada.svg",
+            "icon-atom.svg",
+            "icon-bnb.svg",
+            "icon-btc.svg",
+            "icon-doge.svg",
+            "icon-eth.svg",
+            "icon-ltc.svg",
+            "icon-shib.svg",
+            "icon-sol.svg",
+            "icon-trx.svg",
+            "icon-usdt.svg",
+            "icon-xmr.svg"
+        ];
+
+        const icons = iconFiles.map(file => iconDir + file);
+
+
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d');
         const projectiles = [];
@@ -153,7 +175,7 @@ const Canvas = ({ updateScore, score, setScore }) => {
         canvas.height = window.innerHeight;
 
         const image = new Image();
-        image.src = playerImage;
+        image.src = './icon.svg';
 
         const player = new Player(
             canvas.width / 2, 
@@ -186,7 +208,10 @@ const Canvas = ({ updateScore, score, setScore }) => {
                     x: Math.cos(angle), 
                     y: Math.sin(angle)
                 };
-                enemies.push(new Enemy(x, y, radius, color, velocity, canvas.getContext('2d')));
+
+                const enemyImages = new Image();
+                enemyImages.src = icons[Math.floor(Math.random() * icons.length)];
+                enemies.push(new Enemy(x, y, radius, color, velocity, enemyImages, canvas.getContext('2d')));
                 //console.log(enemies);
             }, 1000);
         };
