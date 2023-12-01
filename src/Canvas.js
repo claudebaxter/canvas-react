@@ -125,26 +125,51 @@ const Canvas = ({ updateScore, score, setScore }) => {
     const [restartModal, setRestartModal] = useState(false);
     const [startModal, setStartModal] = useState(true);
     const [newGame, setNewGame] = useState(0);
+    const [backgroundMusicLoaded, setBackgroundMusicLoaded] = useState(false);
+    const [isMusicPlaying, setIsMusicPlaying] = useState(false);
     const canvasRef = useRef(null);
     const animationFrame = useRef(null);
+    const backgroundMusicRef = useRef(null);
 
     const handlePlayerDeath = () => {
         setRestartModal(true);
+        setIsMusicPlaying(false);
+        backgroundMusicRef.current.pause();
+        backgroundMusicRef.current.currentTime = 0;
     };
 
     const handleRestart = () => {
         setScore(0);
         setRestartModal(false);
+        setIsMusicPlaying(true);
         setNewGame(newGame + 1);
     };
 
     const handleStart = () => {
         setStartModal(false);
+        setIsMusicPlaying(true);
         setNewGame(newGame + 1);
     };
 
+    const playBackgroundMusic = () => {
+        if (backgroundMusicLoaded && isMusicPlaying) {
+            backgroundMusicRef.current.play();
+        }
+    };
+
     useEffect(() => {
-        if (newGame === 0) return;
+        const music = new Audio('./Lexica-Tiger-Tracks.mp3');
+        music.loop = true;
+        music.oncanplaythrough = () => {
+            // Set state to indicate that background music is loaded
+            setBackgroundMusicLoaded(true);
+        };
+        backgroundMusicRef.current = music;
+
+        
+        if (newGame === 0 && setBackgroundMusicLoaded === false) return;
+
+        playBackgroundMusic();
 
         const iconDir = "./enemies/";
         const iconFiles = [
@@ -306,8 +331,6 @@ const Canvas = ({ updateScore, score, setScore }) => {
         };
     }, [newGame]);
 
-    
-
     return (
         <React.Fragment>
         {restartModal && (
@@ -344,7 +367,9 @@ const Canvas = ({ updateScore, score, setScore }) => {
                         padding: '8px 16px',
                         cursor: 'pointer'
                     }} 
-                    onClick={handleRestart}>RESTART</button>
+                    onClick={() => {
+                        handleRestart()
+                        setIsMusicPlaying(true)}}>RESTART</button>
                     <div className="switch-container">
                         <label className="switch">
                             <input type="checkbox" defaultChecked />
@@ -377,7 +402,9 @@ const Canvas = ({ updateScore, score, setScore }) => {
                     padding: '8px 16px',
                     cursor: 'pointer'
                 }}
-                onClick={handleStart}>
+                onClick={() => {
+                    handleStart()
+                    setIsMusicPlaying(true)}}>
                     START
                 </button>
             </div>
