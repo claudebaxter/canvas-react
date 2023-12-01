@@ -30,6 +30,6 @@ export default App;
 
 /*
 this will go above Canvas component eventually
-            <img id="playerImage" src="./icon.svg" style={{ display: 'none' }} />
+            
             <audio id="backgroundMusic" src="./Lexica-Tiger-Tracks.mp3" loop />
 */

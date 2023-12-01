@@ -1,21 +1,24 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import './App.css';
+import playerImage from './icon.svg';
 
 // Define prototypes and handlers outside the component function
 class Player {
-    constructor(x, y, radius, color, context) {
+    constructor(x, y, radius, playerImage, context) {
         this.x = x;
         this.y = y;
         this.radius = radius;
-        this.color = color;
+        this.image = playerImage;
         this.context = context;
     }
     draw() {
-        this.context.beginPath();
-        this.context.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-        this.context.fillStyle = this.color;
-        this.context.fill();
+        this.context.drawImage(
+            this.image, 
+            this.x - this.radius, 
+            this.y - this.radius, 
+            this.radius * 2, 
+            this.radius * 2)
     }
 }
 
@@ -149,7 +152,15 @@ const Canvas = ({ updateScore, score, setScore }) => {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        const player = new Player(canvas.width / 2, canvas.height / 2, 10, 'white', context);
+        const image = new Image();
+        image.src = playerImage;
+
+        const player = new Player(
+            canvas.width / 2, 
+            canvas.height / 2, 
+            20, 
+            image, 
+            context);
 
         function spawnEnemies() {
             setInterval(() => {
