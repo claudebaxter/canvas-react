@@ -166,7 +166,7 @@ const Canvas = ({ updateScore, score, setScore }) => {
         };
         backgroundMusicRef.current = music;
         
-        if (newGame === 0 && !backgroundMusicLoaded && startModal) return;
+        if (startModal) return;
 
         playBackgroundMusic();
 
