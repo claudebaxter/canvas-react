@@ -127,6 +127,7 @@ const Canvas = ({ updateScore, score, setScore }) => {
     const [newGame, setNewGame] = useState(0);
     const [backgroundMusicLoaded, setBackgroundMusicLoaded] = useState(false);
     const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+    const [pauseMusic, setPauseMusic] = useState(false);
     const canvasRef = useRef(null);
     const animationFrame = useRef(null);
     const backgroundMusicRef = useRef(null);
@@ -151,9 +152,20 @@ const Canvas = ({ updateScore, score, setScore }) => {
         setNewGame(newGame + 1);
     };
 
+    const handleMusicPause = () => {
+        if (!pauseMusic) {
+            setPauseMusic(true);
+        } else {
+            setPauseMusic(false);
+        }
+    }
+
     const playBackgroundMusic = () => {
-        if (backgroundMusicLoaded && isMusicPlaying) {
+        if (backgroundMusicLoaded && isMusicPlaying && !pauseMusic) {
             backgroundMusicRef.current.play();
+        } else if (pauseMusic) {
+            backgroundMusicRef.current.pause();
+            backgroundMusicRef.current.currentTime = 0;
         }
     };
 
@@ -371,7 +383,11 @@ const Canvas = ({ updateScore, score, setScore }) => {
                         setIsMusicPlaying(true)}}>RESTART</button>
                     <div className="switch-container">
                         <label className="switch">
-                            <input type="checkbox" defaultChecked />
+                            <input type="checkbox" 
+                                checked={!pauseMusic} 
+                                onClick={() => {
+                                    handleMusicPause();
+                                }}/>
                             <span className="slider round"></span>
                             <span className="switch-label">Music On/Off</span>
                         </label>
