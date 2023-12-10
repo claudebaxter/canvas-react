@@ -358,7 +358,7 @@ const Canvas = ({ updateScore, score, setScore }) => {
                 const upgradeImage = new Image();
                 upgradeImage.src = upgradeSprite[Math.floor(Math.random() * upgradeSprite.length)];
                 upgrades.push(new Upgrade(x, y, radius, color, velocity, upgradeImage, canvas.getContext('2d')));
-                console.log('New Upgrade:', upgrades);
+                console.log('New Upgrade:', upgradeImage);
             }, 15000);
         };
 
@@ -400,6 +400,10 @@ const Canvas = ({ updateScore, score, setScore }) => {
                 if (dist - upgrade.radius - player.radius < 1 && !upgrade.isAcquired()) {
                     upgrade.setAcquired(true); // set flag to prevent multiple conditional triggers
 
+                    let upgradeImage = upgrade.upgradeImage
+                    //extract filename without extension to simplify conditions:
+                    let acquiredUpgrade = upgradeImage.src.match(/\/([^/]+)\.[^.]+$/)[1];
+
                     gsap.to(upgrade, {
                         radius: upgrade.radius - 10,
                         onComplete: () => {
@@ -407,7 +411,28 @@ const Canvas = ({ updateScore, score, setScore }) => {
                             upgrade.setAcquired(false);
                             console.log('Upgrade acquired!');
                             updateScore(250);
-                            startScatterShot();
+                            if (acquiredUpgrade == "icon-afd") {
+                                console.log('Scatter Shot Acquired!', upgrade.upgradeImage);
+                                startScatterShot();
+                            } else if (acquiredUpgrade == "icon-algo") {
+                                console.log('Shield Acquired!', upgrade.upgradeImage);
+                                startScatterShot();
+                            } else if (acquiredUpgrade == "icon-dc") {
+                                console.log('Rapid Fire Acquired!', upgrade.upgradeImage);
+                                startScatterShot();
+                            } else if (acquiredUpgrade == "icon-grad") {
+                                console.log('Bombs Acquired!', upgrade.upgradeImage);
+                                startScatterShot();
+                            } else if (acquiredUpgrade == "icon-ogs") {
+                                console.log('Gnomes Acquired!', upgrade.upgradeImage);
+                                startScatterShot();
+                            } else if (acquiredUpgrade == "icon-puddin") {
+                                console.log('Rear Cannons Acquired!', upgrade.upgradeImage);
+                                startScatterShot();
+                            } else if (acquiredUpgrade == "icon-trts") {
+                                console.log('Treats acquired:', upgrade.upgradeImage);
+                                startScatterShot();
+                            }
                         }
                     })   
                 }
