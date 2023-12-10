@@ -186,6 +186,8 @@ const Canvas = ({ updateScore, score, setScore }) => {
     let enemySpawnInterval;
     let upgradeSpawnInterval;
     let scatterShotTimeoutId = null;
+    let shieldActive = false;
+    let shieldTimeoutId = null;
 
     function startScatterShot() {
         scatterShotActive = true;
@@ -193,6 +195,28 @@ const Canvas = ({ updateScore, score, setScore }) => {
         scatterShotTimeoutId = setTimeout(() => {
             scatterShotActive = false;
         }, 10000)
+    }
+
+    function startShield(player, context) {
+        shieldActive = true;
+        clearTimeout(shieldTimeoutId);
+        shieldTimeoutId = setTimeout(() => {
+            shieldActive = false;
+        }, 15000)
+    
+        const startTime = performance.now();
+        function shieldAnimate() {
+            const elapsedTime = performance.now() - startTime;
+                context.beginPath();
+                context.arc(player.x, player.y, player.radius + 50, 0, Math.PI * 2, false);
+                context.strokeStyle = 'purple';
+                context.lineWidth = 7;
+                context.stroke();
+                if (elapsedTime < 15000) {
+                    requestAnimationFrame(shieldAnimate);
+                }
+        }
+        shieldAnimate();
     }
 
     const handlePlayerDeath = () => {
@@ -206,6 +230,10 @@ const Canvas = ({ updateScore, score, setScore }) => {
 
     const handleRestart = () => {
         setScore(0);
+        scatterShotActive = false;
+        scatterShotTimeoutId = null;
+        shieldActive = false;
+        shieldTimeoutId = null;
         setRestartModal(false);
         setIsMusicPlaying(true);
         setNewGame(newGame + 1);
@@ -359,7 +387,7 @@ const Canvas = ({ updateScore, score, setScore }) => {
                 upgradeImage.src = upgradeSprite[Math.floor(Math.random() * upgradeSprite.length)];
                 upgrades.push(new Upgrade(x, y, radius, color, velocity, upgradeImage, canvas.getContext('2d')));
                 console.log('New Upgrade:', upgradeImage);
-            }, 15000);
+            }, 20000);
         };
 
         function animate() {
@@ -411,25 +439,25 @@ const Canvas = ({ updateScore, score, setScore }) => {
                             upgrade.setAcquired(false);
                             console.log('Upgrade acquired!');
                             updateScore(250);
-                            if (acquiredUpgrade == "icon-afd") {
+                            if (acquiredUpgrade === "icon-afd") {
                                 console.log('Scatter Shot Acquired!', upgrade.upgradeImage);
                                 startScatterShot();
-                            } else if (acquiredUpgrade == "icon-algo") {
+                            } else if (acquiredUpgrade === "icon-algo") {
                                 console.log('Shield Acquired!', upgrade.upgradeImage);
-                                startScatterShot();
-                            } else if (acquiredUpgrade == "icon-dc") {
+                                startShield(player, context);
+                            } else if (acquiredUpgrade === "icon-dc") {
                                 console.log('Rapid Fire Acquired!', upgrade.upgradeImage);
                                 startScatterShot();
-                            } else if (acquiredUpgrade == "icon-grad") {
+                            } else if (acquiredUpgrade === "icon-grad") {
                                 console.log('Bombs Acquired!', upgrade.upgradeImage);
-                                startScatterShot();
-                            } else if (acquiredUpgrade == "icon-ogs") {
+                                startShield(player, context);
+                            } else if (acquiredUpgrade === "icon-ogs") {
                                 console.log('Gnomes Acquired!', upgrade.upgradeImage);
                                 startScatterShot();
-                            } else if (acquiredUpgrade == "icon-puddin") {
+                            } else if (acquiredUpgrade === "icon-puddin") {
                                 console.log('Rear Cannons Acquired!', upgrade.upgradeImage);
-                                startScatterShot();
-                            } else if (acquiredUpgrade == "icon-trts") {
+                                startShield(player, context);
+                            } else if (acquiredUpgrade === "icon-trts") {
                                 console.log('Treats acquired:', upgrade.upgradeImage);
                                 startScatterShot();
                             }
@@ -443,10 +471,42 @@ const Canvas = ({ updateScore, score, setScore }) => {
                 enemy.update();
 
                 const dist = Math.hypot(player.x - enemy.x, player.y - enemy.y);
-                //enemy player hit detection
-                if (dist - enemy.radius - player.radius < 1) {
-                    cancelAnimationFrame(animationFrame.current);
-                    handlePlayerDeath();
+                const borderDist = dist - player.radius - 55;
+                if (!shieldActive) {
+                    //enemy player hit detection
+                    if (dist - enemy.radius - player.radius < 1) {
+                        cancelAnimationFrame(animationFrame.current);
+                        handlePlayerDeath();
+                    }
+                } else {
+                    if (borderDist - enemy.radius < 1) {  
+                        //enemy particle explosion when touching shield  
+                        for (let i = 0; i < enemy.radius * 2; i++) {
+                            particles.push(
+                                new Particle(
+                                    enemy.x,
+                                    enemy.y,
+                                    Math.random() * 2,
+                                    enemy.color,
+                                    {
+                                        x: (Math.random() - 0.5) * (Math.random() * 8),
+                                        y: (Math.random() - 0.5) * (Math.random() * 8)
+                                    },
+                                    context
+                                )
+                            )
+                        }
+                        if (enemy.radius - 10 > 5) {
+                            updateScore(100);
+                            gsap.to(enemy, {
+                                radius: enemy.radius - enemy.radius
+                            })
+                        } else {
+                            //remove enemy if destroyed by shield
+                            updateScore(250);
+                            enemies.splice(index, 1);
+                        }
+                    }
                 }
 
                 for (let projectilesIndex = projectiles.length - 1; projectilesIndex >= 0; projectilesIndex--) {
