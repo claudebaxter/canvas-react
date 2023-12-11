@@ -133,7 +133,9 @@ class Upgrade {
 };
 
 let scatterShotActive = false;
-const clickHandler = (event, canvas, projectiles) => {
+let bombShotActive = false;
+let bombFired = false;
+const clickHandler = (event, context, canvas, enemies, projectiles, particles, updateScore) => {
     const angle = Math.atan2(
         event.clientY - canvas.height / 2,
         event.clientX - canvas.width / 2)
@@ -143,16 +145,7 @@ const clickHandler = (event, canvas, projectiles) => {
         y: Math.sin(angle) * 5
     }
 
-    if (!scatterShotActive) {
-        projectiles.push(new Projectile(
-            canvas.width / 2, 
-            canvas.height / 2, 
-            5, 
-            'white', 
-            velocity,
-            canvas.getContext('2d')
-        ));
-    } else {
+    if (scatterShotActive) {
         for (let i = 0; i < 5; i++) {
             const spreadAngle = (Math.PI / 25) * (i - 2);
             const spreadVelocity = {
@@ -163,11 +156,74 @@ const clickHandler = (event, canvas, projectiles) => {
                 canvas.width / 2, 
                 canvas.height / 2, 
                 5, 
-                'white', 
+                'red', 
                 spreadVelocity,
                 canvas.getContext('2d')
             ))
         }
+    } else if (bombShotActive && !bombFired) {
+        projectiles.push(new Projectile(
+            canvas.width / 2, 
+            canvas.height / 2, 
+            25, 
+            'blue', 
+            velocity, 
+            canvas.getContext('2d')
+        ))
+
+        bombFired = true;
+    } else if (bombShotActive && bombFired) {
+        const blueIndex = projectiles.findIndex(p => p.color === 'blue');
+
+        if (blueIndex !== -1) {
+            const projectile = projectiles[blueIndex];
+            console.log('projectile: ', projectiles, projectile);
+            projectile.update();
+            projectiles.splice(blueIndex, 1);
+
+            //draw shockwave when bomb explodes
+            context.globalAlpha = 0.5;
+            context.fillStyle = 'blue';
+            context.beginPath();
+            context.arc(projectile.x, projectile.y, 250, 0, 2 * Math.PI);
+            context.fill();
+            context.globalAlpha = 1;
+
+            //destroy / remove enemies inside shockwave radius:
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                const enemy = enemies[i];
+                const distance = Math.hypot(enemy.x - projectile.x, enemy.y - projectile.y);
+                if (distance <= 250) {
+                    for (let i = 0; i < enemy.radius * 2; i++) {
+                        particles.push(
+                            new Particle(
+                                enemy.x, 
+                                enemy.y, 
+                                Math.random() * 2, 
+                                enemy.color, 
+                                {
+                                    x: (Math.random() - 0.5) * (Math.random() * 8), 
+                                    y: (Math.random() - 0.5) * (Math.random() * 8)
+                                }, 
+                                context))
+                    }
+                    updateScore(250);
+                    enemies.splice(i, 1);
+                }
+            }
+        }
+
+        bombFired = false;
+    } else {
+        //if no upgrades, fire normal projectiles
+        projectiles.push(new Projectile(
+            canvas.width / 2, 
+            canvas.height / 2, 
+            5, 
+            'white', 
+            velocity,
+            canvas.getContext('2d')
+        ));
     }
 
     
@@ -188,6 +244,7 @@ const Canvas = ({ updateScore, score, setScore }) => {
     let scatterShotTimeoutId = null;
     let shieldActive = false;
     let shieldTimeoutId = null;
+    let bombShotTimeoutId = null;
 
     function startScatterShot() {
         scatterShotActive = true;
@@ -195,6 +252,14 @@ const Canvas = ({ updateScore, score, setScore }) => {
         scatterShotTimeoutId = setTimeout(() => {
             scatterShotActive = false;
         }, 10000)
+    }
+
+    function startBombShot() {
+        bombShotActive = true;
+        clearTimeout(bombShotTimeoutId);
+        bombShotTimeoutId = setTimeout(() => {
+            bombShotActive = false;
+        }, 10000);
     }
 
     function startShield(player, context) {
@@ -234,6 +299,9 @@ const Canvas = ({ updateScore, score, setScore }) => {
         scatterShotTimeoutId = null;
         shieldActive = false;
         shieldTimeoutId = null;
+        bombShotActive = false;
+        bombShotTimeoutId = null;
+        bombFired = false;
         setRestartModal(false);
         setIsMusicPlaying(true);
         setNewGame(newGame + 1);
@@ -387,7 +455,7 @@ const Canvas = ({ updateScore, score, setScore }) => {
                 upgradeImage.src = upgradeSprite[Math.floor(Math.random() * upgradeSprite.length)];
                 upgrades.push(new Upgrade(x, y, radius, color, velocity, upgradeImage, canvas.getContext('2d')));
                 console.log('New Upgrade:', upgradeImage);
-            }, 20000);
+            }, 30000);
         };
 
         function animate() {
@@ -450,7 +518,7 @@ const Canvas = ({ updateScore, score, setScore }) => {
                                 startScatterShot();
                             } else if (acquiredUpgrade === "icon-grad") {
                                 console.log('Bombs Acquired!', upgrade.upgradeImage);
-                                startShield(player, context);
+                                startBombShot();
                             } else if (acquiredUpgrade === "icon-ogs") {
                                 console.log('Gnomes Acquired!', upgrade.upgradeImage);
                                 startScatterShot();
@@ -459,7 +527,7 @@ const Canvas = ({ updateScore, score, setScore }) => {
                                 startShield(player, context);
                             } else if (acquiredUpgrade === "icon-trts") {
                                 console.log('Treats acquired:', upgrade.upgradeImage);
-                                startScatterShot();
+                                startBombShot();
                             }
                         }
                     })   
@@ -551,7 +619,7 @@ const Canvas = ({ updateScore, score, setScore }) => {
         spawnEnemies();
         spawnUpgrades();
 
-        const clickHandlerWrapper = (event) => clickHandler(event, canvas, projectiles);
+        const clickHandlerWrapper = (event) => clickHandler(event, context, canvas, enemies, projectiles, particles, updateScore);
         canvas.addEventListener('click', clickHandlerWrapper);
 
         return () => {
@@ -603,7 +671,7 @@ const Canvas = ({ updateScore, score, setScore }) => {
                         <label className="switch">
                             <input type="checkbox" 
                                 checked={!pauseMusic} 
-                                onClick={() => {
+                                onChange={() => {
                                     handleMusicPause();
                                 }}/>
                             <span className="slider round"></span>
