@@ -135,7 +135,34 @@ class Upgrade {
 let scatterShotActive = false;
 let bombShotActive = false;
 let bombFired = false;
+let rapidFireActive = false;
+let rapidFireIntervalId = null;
+
+const mouseDownHandler = (event, context, canvas, projectiles) => {
+    const angle = Math.atan2(
+        event.clientY - canvas.height / 2,
+        event.clientX - canvas.width / 2)
+
+    const velocity = {
+        x: Math.cos(angle) * 5,
+        y: Math.sin(angle) * 5
+    }
+    if (rapidFireActive) {
+        rapidFireIntervalId = setInterval(() => {
+            projectiles.push(new Projectile(
+                canvas.width / 2, canvas.height / 2, 5, 'red', velocity, context
+            ))
+        }, 100)
+    }
+}
+
+const mouseUpHandler = () => {
+    clearInterval(rapidFireIntervalId);
+}
+
 const clickHandler = (event, context, canvas, enemies, projectiles, particles, updateScore) => {
+    if (rapidFireActive) return;
+
     const angle = Math.atan2(
         event.clientY - canvas.height / 2,
         event.clientX - canvas.width / 2)
@@ -158,7 +185,7 @@ const clickHandler = (event, context, canvas, enemies, projectiles, particles, u
                 5, 
                 'red', 
                 spreadVelocity,
-                canvas.getContext('2d')
+                context
             ))
         }
     } else if (bombShotActive && !bombFired) {
@@ -222,7 +249,7 @@ const clickHandler = (event, context, canvas, enemies, projectiles, particles, u
             5, 
             'white', 
             velocity,
-            canvas.getContext('2d')
+            context
         ));
     }
 
@@ -245,6 +272,7 @@ const Canvas = ({ updateScore, score, setScore }) => {
     let shieldActive = false;
     let shieldTimeoutId = null;
     let bombShotTimeoutId = null;
+    let rapidFireTimeoutId = null;
 
     function startScatterShot() {
         scatterShotActive = true;
@@ -260,6 +288,15 @@ const Canvas = ({ updateScore, score, setScore }) => {
         bombShotTimeoutId = setTimeout(() => {
             bombShotActive = false;
         }, 10000);
+    }
+
+    function startRapidFire() {
+        rapidFireActive = true;
+        clearTimeout(rapidFireTimeoutId);
+        rapidFireTimeoutId = setTimeout(() => {
+            rapidFireActive = false;
+            clearInterval(rapidFireIntervalId);
+        }, 10000)
     }
 
     function startShield(player, context) {
@@ -302,6 +339,9 @@ const Canvas = ({ updateScore, score, setScore }) => {
         bombShotActive = false;
         bombShotTimeoutId = null;
         bombFired = false;
+        rapidFireActive = false;
+        rapidFireTimeoutId = null;
+        rapidFireIntervalId = null;
         setRestartModal(false);
         setIsMusicPlaying(true);
         setNewGame(newGame + 1);
@@ -515,7 +555,7 @@ const Canvas = ({ updateScore, score, setScore }) => {
                                 startShield(player, context);
                             } else if (acquiredUpgrade === "icon-dc") {
                                 console.log('Rapid Fire Acquired!', upgrade.upgradeImage);
-                                startScatterShot();
+                                startRapidFire();
                             } else if (acquiredUpgrade === "icon-grad") {
                                 console.log('Bombs Acquired!', upgrade.upgradeImage);
                                 startBombShot();
@@ -622,8 +662,19 @@ const Canvas = ({ updateScore, score, setScore }) => {
         const clickHandlerWrapper = (event) => clickHandler(event, context, canvas, enemies, projectiles, particles, updateScore);
         canvas.addEventListener('click', clickHandlerWrapper);
 
+        const mouseDownWrapper = (event) => {
+            mouseDownHandler(event, context, canvas, projectiles);
+        }
+        canvas.addEventListener('mousedown', mouseDownWrapper);
+        //canvas.addEventListener('mousemove', mouseDownWrapper);
+
+        const mouseUpWrapper = (event) => mouseUpHandler(event, context, canvas, projectiles);
+        canvas.addEventListener('mouseup', mouseUpWrapper);
+
         return () => {
             canvas.removeEventListener('click', clickHandlerWrapper);
+            canvas.removeEventListener('mousedown', mouseDownWrapper);
+            canvas.removeEventListener('mouseup', mouseUpWrapper);
             cancelAnimationFrame(animationFrame.current);
         };
     }, [newGame]);
@@ -708,6 +759,17 @@ const Canvas = ({ updateScore, score, setScore }) => {
                     setIsMusicPlaying(true)}}>
                     START
                 </button>
+                <div className="switch-container">
+                    <label className="switch">
+                        <input type="checkbox" 
+                                checked={!pauseMusic} 
+                                onChange={() => {
+                                    handleMusicPause();
+                        }}/>
+                        <span className="slider round"></span>
+                        <span className="switch-label">Music On/Off</span>
+                    </label>
+                </div>
             </div>
         )}
         <canvas ref={canvasRef} />
