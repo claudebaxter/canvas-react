@@ -138,21 +138,23 @@ let bombFired = false;
 let rapidFireActive = false;
 let rapidFireIntervalId = null;
 
-const mouseDownHandler = (event, context, canvas, projectiles) => {
-    const angle = Math.atan2(
-        event.clientY - canvas.height / 2,
-        event.clientX - canvas.width / 2)
-
-    const velocity = {
-        x: Math.cos(angle) * 5,
-        y: Math.sin(angle) * 5
-    }
-    if (rapidFireActive) {
+const mouseDownHandler = (event, context, canvas, projectiles, mousePositionRef) => {
+    if (event && rapidFireActive) {
         rapidFireIntervalId = setInterval(() => {
+            const angle = Math.atan2(
+                mousePositionRef.current.y - canvas.height / 2,
+                mousePositionRef.current.x - canvas.width / 2)
+        
+            const velocity = {
+                x: Math.cos(angle) * 5,
+                y: Math.sin(angle) * 5
+            }
+
             projectiles.push(new Projectile(
                 canvas.width / 2, canvas.height / 2, 5, 'red', velocity, context
             ))
         }, 100)
+    
     }
 }
 
@@ -204,7 +206,6 @@ const clickHandler = (event, context, canvas, enemies, projectiles, particles, u
 
         if (blueIndex !== -1) {
             const projectile = projectiles[blueIndex];
-            console.log('projectile: ', projectiles, projectile);
             projectile.update();
             projectiles.splice(blueIndex, 1);
 
@@ -263,6 +264,7 @@ const Canvas = ({ updateScore, score, setScore }) => {
     const [backgroundMusicLoaded, setBackgroundMusicLoaded] = useState(false);
     const [isMusicPlaying, setIsMusicPlaying] = useState(false);
     const [pauseMusic, setPauseMusic] = useState(false);
+    const mousePositionRef = useRef({x: 0, y: 0})
     const canvasRef = useRef(null);
     const animationFrame = useRef(null);
     const backgroundMusicRef = useRef(null);
@@ -370,6 +372,16 @@ const Canvas = ({ updateScore, score, setScore }) => {
         }
     };
 
+    //keep updated mouse position for rapid fire tracking
+    const mouseMoveHandler = (event) => {
+        if (rapidFireActive) {
+            mousePositionRef.current = {
+                x: event.clientX,
+                y: event.clientY
+            }
+        }
+    }
+
     useEffect(() => {
         const music = new Audio('./Lexica-Tiger-Tracks.mp3');
         music.loop = true;
@@ -462,7 +474,6 @@ const Canvas = ({ updateScore, score, setScore }) => {
                 const enemyImages = new Image();
                 enemyImages.src = enemySprite[Math.floor(Math.random() * enemySprite.length)];
                 enemies.push(new Enemy(x, y, radius, color, velocity, enemyImages, canvas.getContext('2d')));
-                console.log('New Enemy: ', enemies);
             }, 1000);
         };
 
@@ -494,7 +505,6 @@ const Canvas = ({ updateScore, score, setScore }) => {
                 const upgradeImage = new Image();
                 upgradeImage.src = upgradeSprite[Math.floor(Math.random() * upgradeSprite.length)];
                 upgrades.push(new Upgrade(x, y, radius, color, velocity, upgradeImage, canvas.getContext('2d')));
-                console.log('New Upgrade:', upgradeImage);
             }, 30000);
         };
 
@@ -567,7 +577,7 @@ const Canvas = ({ updateScore, score, setScore }) => {
                                 startShield(player, context);
                             } else if (acquiredUpgrade === "icon-trts") {
                                 console.log('Treats acquired:', upgrade.upgradeImage);
-                                startBombShot();
+                                startRapidFire();
                             }
                         }
                     })   
@@ -651,8 +661,6 @@ const Canvas = ({ updateScore, score, setScore }) => {
                     }
                 };
             };
-
-            //console.log('animationFrame');
         }
 
         animate();
@@ -663,10 +671,14 @@ const Canvas = ({ updateScore, score, setScore }) => {
         canvas.addEventListener('click', clickHandlerWrapper);
 
         const mouseDownWrapper = (event) => {
-            mouseDownHandler(event, context, canvas, projectiles);
+            mouseDownHandler(event, context, canvas, projectiles, mousePositionRef);
         }
         canvas.addEventListener('mousedown', mouseDownWrapper);
-        //canvas.addEventListener('mousemove', mouseDownWrapper);
+
+        const mouseMoveWrapper = (event) => {
+            mouseMoveHandler(event);
+        }
+        canvas.addEventListener('mousemove', mouseMoveWrapper);
 
         const mouseUpWrapper = (event) => mouseUpHandler(event, context, canvas, projectiles);
         canvas.addEventListener('mouseup', mouseUpWrapper);
@@ -675,6 +687,7 @@ const Canvas = ({ updateScore, score, setScore }) => {
             canvas.removeEventListener('click', clickHandlerWrapper);
             canvas.removeEventListener('mousedown', mouseDownWrapper);
             canvas.removeEventListener('mouseup', mouseUpWrapper);
+            canvas.removeEventListener('mousemove', mouseMoveWrapper);
             cancelAnimationFrame(animationFrame.current);
         };
     }, [newGame]);
