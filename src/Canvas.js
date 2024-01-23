@@ -470,7 +470,7 @@ const Canvas = ({ updateScore, score, setScore }) => {
                 const enemyImages = new Image();
                 enemyImages.src = enemySprite[Math.floor(Math.random() * enemySprite.length)];
                 enemies.push(new Enemy(x, y, radius, color, velocity, enemyImages, canvas.getContext('2d')));
-            }, 10000);
+            }, 1000);
         };
 
         function spawnUpgrades() {
@@ -501,7 +501,7 @@ const Canvas = ({ updateScore, score, setScore }) => {
                 const upgradeImage = new Image();
                 upgradeImage.src = upgradeSprite[Math.floor(Math.random() * upgradeSprite.length)];
                 upgrades.push(new Upgrade(x, y, radius, color, velocity, upgradeImage, canvas.getContext('2d')));
-            }, 3000);
+            }, 30000);
         };
 
         function animate() {
