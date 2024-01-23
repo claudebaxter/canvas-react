@@ -397,31 +397,27 @@ const Canvas = ({ updateScore, score, setScore }) => {
 
         const enemyDir = "./enemies/";
         const enemyFiles = [
-            "icon-ada.svg",
-            "icon-atom.svg",
-            "icon-bnb.svg",
-            "icon-btc.svg",
-            "icon-doge.svg",
-            "icon-eth.svg",
-            "icon-ltc.svg",
-            "icon-shib.svg",
-            "icon-sol.svg",
-            "icon-trx.svg",
-            "icon-usdt.svg",
-            "icon-xmr.svg"
+            "AO.svg",
+            "DARKCOIN.svg",
+            "Gold.svg",
+            "GoldDAO.svg",
+            "META.svg",
+            "PRSMS.svg",
+            "TACOS.svg",
+            "THC.svg",
+            "TRTS.svg",
+            "VOTE.svg",
+            "YARN.svg"
         ];
 
         const enemySprite = enemyFiles.map(file => enemyDir + file);
 
         const upgradeDir = "./upgrades/";
         const upgradeFiles = [
-            "icon-afd.svg",
-            "icon-algo.svg",
-            "icon-dc.svg",
-            "icon-grad.svg",
-            "icon-ogs.svg",
-            "icon-puddin.svg",
-            "icon-trts.svg"
+            "bombshot.png",
+            "rapidfire.png",
+            "scattershot.png",
+            "shield.png"
         ];
 
         const upgradeSprite = upgradeFiles.map(file => upgradeDir + file);
@@ -474,7 +470,7 @@ const Canvas = ({ updateScore, score, setScore }) => {
                 const enemyImages = new Image();
                 enemyImages.src = enemySprite[Math.floor(Math.random() * enemySprite.length)];
                 enemies.push(new Enemy(x, y, radius, color, velocity, enemyImages, canvas.getContext('2d')));
-            }, 1000);
+            }, 10000);
         };
 
         function spawnUpgrades() {
@@ -505,7 +501,7 @@ const Canvas = ({ updateScore, score, setScore }) => {
                 const upgradeImage = new Image();
                 upgradeImage.src = upgradeSprite[Math.floor(Math.random() * upgradeSprite.length)];
                 upgrades.push(new Upgrade(x, y, radius, color, velocity, upgradeImage, canvas.getContext('2d')));
-            }, 30000);
+            }, 3000);
         };
 
         function animate() {
@@ -557,28 +553,19 @@ const Canvas = ({ updateScore, score, setScore }) => {
                             upgrade.setAcquired(false);
                             console.log('Upgrade acquired!');
                             updateScore(250);
-                            if (acquiredUpgrade === "icon-afd") {
+                            if (acquiredUpgrade === "scattershot") {
                                 console.log('Scatter Shot Acquired!', upgrade.upgradeImage);
                                 startScatterShot();
-                            } else if (acquiredUpgrade === "icon-algo") {
+                            } else if (acquiredUpgrade === "shield") {
                                 console.log('Shield Acquired!', upgrade.upgradeImage);
                                 startShield(player, context);
-                            } else if (acquiredUpgrade === "icon-dc") {
+                            } else if (acquiredUpgrade === "rapidfire") {
                                 console.log('Rapid Fire Acquired!', upgrade.upgradeImage);
                                 startRapidFire();
-                            } else if (acquiredUpgrade === "icon-grad") {
+                            } else if (acquiredUpgrade === "bombshot") {
                                 console.log('Bombs Acquired!', upgrade.upgradeImage);
                                 startBombShot();
-                            } else if (acquiredUpgrade === "icon-ogs") {
-                                console.log('Gnomes Acquired!', upgrade.upgradeImage);
-                                startScatterShot();
-                            } else if (acquiredUpgrade === "icon-puddin") {
-                                console.log('Rear Cannons Acquired!', upgrade.upgradeImage);
-                                startShield(player, context);
-                            } else if (acquiredUpgrade === "icon-trts") {
-                                console.log('Treats acquired:', upgrade.upgradeImage);
-                                startRapidFire();
-                            }
+                            } 
                         }
                     })   
                 }
@@ -757,7 +744,7 @@ const Canvas = ({ updateScore, score, setScore }) => {
                 textAlign: 'center',
                 borderRadius: '15px'
             }}>
-                <h1 style={{ fontSize: '24px', color: 'red', marginBottom: '0', marginTop: '8px' }}>ASAteroids</h1>
+                <h1 style={{ fontSize: '24px', color: 'red', marginBottom: '0', marginTop: '8px' }}>ASA Blasters</h1>
                 <button id="startButton" style={{
                     marginTop: '12px',
                     backgroundColor: 'blue',
